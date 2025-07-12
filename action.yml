@@ -1,0 +1,41 @@
+name: 'Run .NET Reactor LicenseManager'
+author: ztzzxyz
+description: 'Runs .NET Reactor LicenseManager based on the operating system of the GitHub Actions runner.'
+inputs:
+  master_key:
+    description: '.NET Reactor masterKey.'
+    required: true
+  license_days:
+    description: 'license days'
+    required: true
+  hardware_id:
+    description: 'hardware id'
+    required: true
+  output_path:
+    description: 'Output path for the licnese file'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout LicenseManager
+      uses: actions/checkout@v4
+      with:
+        ref: 'licensemgr'
+        repository: ztzzxyz/dotnet-reactor-run-action
+        fetch-depth: 0
+    
+    # Install the .NET Core workload
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v4
+      env:
+        DOTNET_INSTALL_DIR: ~/.dotnet
+        NUGET_PACKAGES: ~/.nuget/packages
+      with:
+        dotnet-version: 9.0.x
+
+    - name: create license
+      run: |
+        cd LicenseManager
+        dotnet run "${{ inputs.master_key }}" "${{ inputs.hardware_id }}" "${{ inputs.license_days }}" "${{ inputs.output_path }}"
+      shell: bash
